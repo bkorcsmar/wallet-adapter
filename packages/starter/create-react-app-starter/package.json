@@ -24,14 +24,16 @@
         "start": "react-app-rewired start",
         "test": "CI=true react-app-rewired test --passWithNoTests",
         "test:watch": "react-app-rewired test --passWithNoTests",
-        "eject": "react-scripts eject"
+        "eject": "react-scripts eject",
+        "balance" : "solana balance `solana-keygen pubkey /home/thedagi/solana/validator-keypair.json`"
     },
     "dependencies": {
-        "@solana/wallet-adapter-base": "workspace:^",
-        "@solana/wallet-adapter-react": "workspace:^",
-        "@solana/wallet-adapter-react-ui": "workspace:^",
-        "@solana/wallet-adapter-wallets": "workspace:^",
+        "@solana/wallet-adapter-base": "0.9.23",
+        "@solana/wallet-adapter-react": "0.15.35",
+        "@solana/wallet-adapter-react-ui": "0.9.35",
+        "@solana/wallet-adapter-wallets": "0.19.32",
         "@solana/web3.js": "^1.77.3",
+        "buffer": "^6.0.3",
         "react": "^18.2.0",
         "react-app-rewired": "^2.2.1",
         "react-dom": "^18.2.0",
