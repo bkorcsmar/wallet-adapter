@@ -1,0 +1,22 @@
+.wallet-adapter-button {
+    margin-right: 0.5em;
+}
+
+.wallet-adapter-input {
+    background-color: #fff;
+    border: 2px solid #512da8;
+    color: #2c2d30;
+    display: block;
+    font-family: 'DM Sans', 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    height: 48px;
+    padding: 0 24px;
+    border-radius: 4px;
+    box-sizing: border-box; /* This makes sure padding and border are included in the element's total width and height */
+    margin-right: 0.5em;
+}
+
+.wallet-adapter-input::placeholder { /* Most modern browsers */
+    color: #2c2d30;
+}

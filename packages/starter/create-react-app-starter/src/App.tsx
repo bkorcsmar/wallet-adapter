@@ -1,10 +1,23 @@
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
-import { ConnectionProvider, useWallet, Wallet, WalletProvider } from '@solana/wallet-adapter-react';
+import {
+    ConnectionProvider,
+    useWallet,
+    WalletContextState,
+    WalletProvider,
+} from '@solana/wallet-adapter-react';
 import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { UnsafeBurnerWalletAdapter } from '@solana/wallet-adapter-wallets';
-import { clusterApiUrl, Connection, PublicKey, Transaction, TransactionInstruction } from '@solana/web3.js';
+import {
+    clusterApiUrl,
+    Connection,
+    PublicKey,
+    Transaction,
+    LAMPORTS_PER_SOL,
+    TransactionInstruction,
+} from '@solana/web3.js';
 import React, { FC, ReactNode, useEffect, useMemo, useState } from 'react';
 import { Buffer } from 'buffer';
+import './styles.css';
 
 require('./App.css');
 require('@solana/wallet-adapter-react-ui/styles.css');
@@ -55,31 +68,42 @@ const Context: FC<{ children: ReactNode }> = ({ children }) => {
     );
 };
 
-const sendInstruction = async (publicKey: PublicKey, signTransaction: (transaction: Transaction) => Promise<Transaction>, connection: Connection) => {
+const sendTransferInstruction = async (wallet : WalletContextState, connection: Connection, targetPublicKey: string, amount: number) => {
     try {
+        const publicKey = wallet.publicKey!;
         console.log("PublicKey: ", publicKey.toBase58());
-        console.log("signTransaction: ", signTransaction.toString());
         console.log("Connection", connection);
 //        const programId = new PublicKey('DVbC3AGo1MXCTqVGRL9kANVdG2RsyRb9dxBWK77FY14X'); -- devnet
         const programId = new PublicKey('438sqaQZU2hho8qJ15qxyQ2Jrb92C16VG2Lxe1XReRYP'); //-- localnet
 
         // const publicKey1 = new PublicKey("A1VF6gKKVfFoC84QgQMw8MF1qdNfcj4z31Hui5SQrcWw");
         // const publicKey1 = new PublicKey("8uoRHMqDfpS4RYXrb2tMkW1n4k1h3dVJkLtZ6z4mp7zL"); // devnet
-        const publicKey1 = new PublicKey("GvKiT3WgKTW5qToUBXnvvvuTAs5NQbVfDdpNyWUDGkXN"); // localnet
-        const keys = [
-            { pubkey: publicKey1, isSigner: true, isWritable: true },
-        ];
-        const uint8Array = new Uint8Array([0, 0, 0, 0, 0]);
-        const instrData = Buffer.from(uint8Array);
-        const instruction = new TransactionInstruction({ keys, programId, data: instrData });
+        // const publicKey1 = new PublicKey("GvKiT3WgKTW5qToUBXnvvvuTAs5NQbVfDdpNyWUDGkXN"); // localnet
 
-        const transaction = new Transaction().add(instruction);
-        transaction.recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
-        if (transaction) {
-            transaction.feePayer = publicKey!;
-            const signed = await signTransaction(transaction);
-            const txid = await connection.sendRawTransaction(signed.serialize());
-            console.log("Transaction sent and confirmed:", txid);
+        let transferInstruction = new TransactionInstruction({
+            keys: [
+                {pubkey: new PublicKey(publicKey), isSigner: true, isWritable: true},
+                {pubkey: new PublicKey(targetPublicKey), isSigner: false, isWritable: true}
+            ],
+            programId: programId,
+            data: Buffer.from([2 /* the index of the 'transfer' instruction in the instruction vector */, amount * LAMPORTS_PER_SOL]),
+        });
+
+        let transaction = new Transaction();
+        transaction.add(transferInstruction);
+        transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+        transaction.feePayer = publicKey;
+
+        // Sign the transaction
+        if (wallet.signTransaction) {
+            let signedTransaction = await wallet.signTransaction(transaction);
+            // Send the transaction and get the transaction id
+            let txid = await connection.sendRawTransaction(
+                signedTransaction.serialize(),
+                { skipPreflight: false, preflightCommitment: "confirmed" }
+            );
+            console.log("Transaction sent:", txid);
+
         }
     } catch (err) {
         console.log(err);
@@ -88,8 +112,23 @@ const sendInstruction = async (publicKey: PublicKey, signTransaction: (transacti
 
 
 const Content: FC = () => {
-    const { publicKey, signTransaction } = useWallet();
+    const [targetPublicKey, setTargetPublicKey] = useState('');
+    const [amount, setAmount] = useState('');
+
+
+    const handlePublicKeyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setTargetPublicKey(event.target.value);
+    };
+
+    const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setAmount(event.target.value);
+    };
+
+    const wallet = useWallet();
+    // const { publicKey, signTransaction } = useWallet();
     const [connection, setConnection] = useState(new Connection(clusterApiUrl(WalletAdapterNetwork.Devnet), 'confirmed'));
+    const publicKey = wallet.publicKey;
+    const signTransaction = wallet.signTransaction;
 
     useEffect(() => {
         setConnection(new Connection("http://localhost:8899", 'confirmed'));
@@ -97,17 +136,19 @@ const Content: FC = () => {
 
     return (
         <div className="App">
-            <button
+            <input className="wallet-adapter-input" type="text" value={targetPublicKey} onChange={handlePublicKeyChange} placeholder="Public Key" style={{ width: '20%'}}/>
+            <input className="wallet-adapter-input" type="number" value={amount} onChange={handleAmountChange} placeholder="Amount in SOL" />
+            <button className="wallet-adapter-button wallet-adapter-button-trigger"
                 onClick={() => {
-                    if (publicKey && signTransaction) {
-                        sendInstruction(publicKey, signTransaction, connection)
-                    }  else {
+                    if (wallet.publicKey && wallet.signTransaction) {
+                        sendTransferInstruction(wallet, connection, targetPublicKey, Number.parseFloat(amount))
+                    } else {
                         console.log("publicKey: ", publicKey);
                         console.log("signTransaction: ", signTransaction);
                         console.log("Connection: ", connection);
                     }
+
                 }}
-                // disabled={!publicKey || !signTransaction}
             >
                 Send Instruction
             </button>
