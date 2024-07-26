@@ -25,7 +25,7 @@
         "test": "CI=true react-app-rewired test --passWithNoTests",
         "test:watch": "react-app-rewired test --passWithNoTests",
         "eject": "react-scripts eject",
-        "balance" : "solana balance `solana-keygen pubkey /home/thedagi/solana/validator-keypair.json`"
+        "balance": "solana balance `solana-keygen pubkey /home/thedagi/solana/validator-keypair.json`"
     },
     "dependencies": {
         "@solana/wallet-adapter-base": "0.9.23",
@@ -34,6 +34,7 @@
         "@solana/wallet-adapter-wallets": "0.19.32",
         "@solana/web3.js": "^1.77.3",
         "buffer": "^6.0.3",
+        "node-polyfill-webpack-plugin": "^4.0.0",
         "react": "^18.2.0",
         "react-app-rewired": "^2.2.1",
         "react-dom": "^18.2.0",
@@ -41,24 +42,24 @@
         "web-vitals": "^2.1.4"
     },
     "devDependencies": {
-        "@testing-library/jest-dom": "^5.16.5",
+        "@testing-library/jest-dom": "^5.17.0",
         "@testing-library/react": "^13.4.0",
-        "@testing-library/user-event": "^14.4.3",
+        "@testing-library/user-event": "^14.5.2",
         "@types/jest": "^28.1.8",
-        "@types/react": "^18.2.13",
-        "@types/react-dom": "^18.2.6",
-        "@types/testing-library__jest-dom": "^5.14.6",
+        "@types/react": "^18.3.3",
+        "@types/react-dom": "^18.3.0",
+        "@types/testing-library__jest-dom": "^5.14.9",
         "browserify-zlib": "^0.2.0",
         "crypto-browserify": "^3.12.0",
         "https-browserify": "^1.0.0",
         "process": "^0.11.10",
         "shx": "^0.3.4",
-        "source-map-loader": "^4.0.1",
+        "source-map-loader": "^4.0.2",
         "stream-browserify": "^3.0.0",
         "stream-http": "^3.2.0",
         "typescript": "~4.7.4",
-        "url": "^0.11.1",
-        "webpack": "^5.88.0"
+        "url": "^0.11.4",
+        "webpack": "^5.93.0"
     },
     "eslintConfig": {
         "extends": [
